@@ -47,3 +47,21 @@ def init_db(app):
             ]
             db.session.add_all(data_awal)
             db.session.commit()
+        # Buat user default jika belum ada
+        if not User.query.filter_by(username='admin').first():
+            admin = User(
+                username='admin',
+                password=generate_password_hash('admin123'),
+                role='admin'
+            )
+            db.session.add(admin)
+
+        if not User.query.filter_by(username='user').first():
+            user = User(
+                username='user',
+                password=generate_password_hash('user123'),
+                role='user'
+            )
+            db.session.add(user)
+
+        db.session.commit()
