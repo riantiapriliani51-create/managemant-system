@@ -40,7 +40,7 @@ def init_db(app):
         if Barang.query.count() == 0:
             data_awal = [
                 Barang(ruang='A', nama='KABEL FASA', jumlah=10, unit='meter', gambar='Kabel fasa.jpg', min_qty=2, max_qty=10),
-                Barang(ruang='A', nama='KABEL NYAF', jumlah=1, unit='roll', gambar='kabel NYAF).jpg', min_qty=2, max_qty=10),
+                Barang(ruang='A', nama='KABEL NYAF', jumlah=1, unit='roll', gambar='kabel-nyaf.jpg', min_qty=2, max_qty=10),
                 Barang(ruang='A', nama='JUMPER MALE TO MALE', jumlah=5, unit='pcs', gambar='Kabel Jumper Male to Male.jpg', min_qty=2, max_qty=10),
                 Barang(ruang='A', nama='JUMPER MALE TO FEMALE', jumlah=10, unit='pcs', gambar='Kabel male to female.jpg', min_qty=2, max_qty=10),
                 Barang(ruang='A', nama='JUMPER FEMALE TO FEMALE', jumlah=15, unit='pcs', gambar='Kabel female to female.jpg', min_qty=2, max_qty=10),
