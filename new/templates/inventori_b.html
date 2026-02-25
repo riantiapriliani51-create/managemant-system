@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventori B</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #0b5fa5, #1e88e5);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .running-text {
+            white-space: nowrap;
+            animation: slideText 20s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes slideText {
+            from { transform: translateX(100%); }
+            to   { transform: translateX(-100%); }
+        }
+
+        .container {
+            padding: 40px;
+            display: flex;
+            gap: 30px;
+        }
+
+        .list { flex: 1; }
+
+        .sidebar { width: 300px; }
+
+        .item-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-download {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .upload-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+        }
+
+        .upload-box input,
+        .upload-box button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .upload-box button {
+            background: #0b5fa5;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .back {
+            background: #0b5fa5;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="running-text">
+        <h1>INVENTORI LAB LISTRIK JURUSAN TEKNIK MESIN POLITEKNIK NEGERI SUBANG</h1>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="list">
+        <h2>Daftar PDF</h2>
+
+        {% if pdf_list %}
+            {% for item in pdf_list %}
+                <div class="item-card">
+                    <h3>{{ item.nama }}</h3>
+                    <a href="{{ url_for('download_file', filename=item.file) }}" class="btn-download">
+                        ⬇ Download PDF
+                    </a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Belum ada file PDF</p>
+        {% endif %}
+    </div>
+
+    <div class="sidebar">
+        {% if session.get('role') == 'admin' %}
+        <div class="upload-box">
+            <h3>📤 Upload PDF</h3>
+            <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_pdf_b') }}">
+                <input type="text" name="nama" placeholder="Nama File" required>
+                <input type="file" name="file" accept=".pdf" required>
+                <button type="submit">Upload</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- TOMBOL KEMBALI (INI YANG KAMU MAU) -->
+        <a href="{{ url_for('kembali_dashboard') }}" class="back">⬅ Kembali</a>
+    </div>
+
+</div>
+
+</body>
+</html>
