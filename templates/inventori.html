@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Inventori {{ nama }}</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f4f4;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #0b5fa5, #1e88e5);
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 60px 0;
+        }
+
+        .marquee span {
+            display: inline-block;
+            padding-left: 100%;
+            font-size: 26px;
+            font-weight: bold;
+            color: white;
+            animation: jalan 20s linear infinite;
+        }
+
+        @keyframes jalan {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        .container {
+            padding: 40px;
+            position: relative;
+        }
+
+        .kolom-kanan {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .btn-kembali-dasboard_user {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #0b5fa5;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 6px;
+            border: 1px solid #fbfdff;
+            margin-top: auto;
+        }
+
+        .item-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px 30px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .item-left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .item-nama {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .min-max-box {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 15px 25px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+
+        .min-max-box .label {
+            font-size: 12px;
+            color: #666;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .min-max-box .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .item-info {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        .box {
+            text-align: center;
+        }
+
+        .box img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .value {
+            background: #e3f2fd;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .value.stok-rendah {
+            background: #fff59d;
+            color: #f57f17;
+            font-weight: bold;
+        }
+
+        .value.stok-penuh {
+            background: #c8e6c9;
+            color: #1b5e20;
+            font-weight: bold;
+        }
+
+        .notif-restock {
+            background: #fff59d;
+            color: #f57f17;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 8px;
+            border: 2px solid #fbc02d;
+        }
+
+        .btn-ambil {
+            background: #e53935;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+
+        .btn-tambah {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 8px;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="marquee">
+            <span>
+                INVENTORI LAB LISTRIK JURUSAN TEKNIK MESIN POLITEKNIK NEGERI SUBANG
+            </span>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- ✅ TOMBOL KEMBALI SESUAI ROLE -->
+        <div style="text-align: right;">
+            {% if session.role == 'admin' %}
+            <a href="{{ url_for('dashboard_admin') }}" class="btn-kembali-dasboard_user">← Kembali</a>
+            {% else %}
+            <a href="{{ url_for('dashboard_user') }}" class="btn-kembali-dasboard_user">← Kembali</a>
+            {% endif %}
+        </div>
+
+        <!-- Notifikasi Flash (ditampilkan sekali di atas) -->
+        {% with messages = get_flashed_messages() %}
+        {% for msg in messages %}
+        <div
+            style="background: #c8e6c9; color: #1b5e20; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-weight: bold; border-left: 4px solid #1b5e20;">
+            {{ msg }}
+        </div>
+        {% endfor %}
+        {% endwith %}
+
+        {% for item in items %}
+        <div class="item-card">
+            <div class="item-left">
+                <div class="item-nama">{{ item.nama }}</div>
+                <div class="min-max-box">
+                    <div class="label">Min - Max</div>
+                    <div class="value">2 - 10</div>
+                </div>
+            </div>
+
+            <div class="item-info">
+
+                <div class="box">
+                    <div>Gambar</div>
+                    <img src="{{ url_for('uploaded_file', filename=item.gambar) }}">
+                </div>
+
+                <div class="box">
+                    <div>Jumlah</div>
+
+                    <!-- Color coding berdasarkan stok -->
+                    {% if item.jumlah >= 10 %}
+                    <div class="value stok-penuh">{{ item.jumlah }}</div>
+                    {% elif item.jumlah <= 2 %} <div class="value stok-rendah">{{ item.jumlah }}
+                </div>
+                {% else %}
+                <div class="value">{{ item.jumlah }}</div>
+                {% endif %}
+
+                <!-- Notifikasi restock untuk stok rendah -->
+                {% if item.jumlah <= 2 %} <div class="notif-restock">Segera Beli Kabel
+            </div>
+            {% endif %}
+
+            {% if session.role in ['user', 'admin'] and item.jumlah > 0 %}
+            <form method="POST" action="{{ url_for('ambil_barang', item_id=item.id) }}">
+                <button class="btn-ambil">Ambil</button>
+            </form>
+            {% endif %}
+        </div>
+
+        <div class="box">
+            <div>Unit</div>
+            <div class="value">{{ item.unit }}</div>
+
+            {% if session.role == 'admin' %}
+            <!-- Tampilkan tombol tambah hanya jika stok < 10 -->
+            {% if item.jumlah < 10 %} <form method="POST"
+                action="{{ url_for('tambah_jumlah_barang', item_id=item.id) }}">
+                <button class="btn-tambah">Tambah</button>
+                </form>
+                {% else %}
+                <!-- Stok penuh - jangan bisa tambah lagi -->
+                <div
+                    style="background: #c8e6c9; color: #1b5e20; padding: 8px 14px; border-radius: 6px; margin-top: 8px; font-weight: bold; text-align: center;">
+                    Stok Penuh
+                </div>
+                {% endif %}
+                {% endif %}
+        </div>
+
+       
+
+    </div>
+    </div>
+    {% endfor %}
+    </div>
+
+</body>
+
+</html>
