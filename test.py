@@ -212,6 +212,94 @@ def export_excel():
     )
 
 
+# ================= EXPORT EXCEL PUBLIC (TANPA LOGIN) =================
+@app.route('/export-public/<ruang>')
+def export_public(ruang):
+    """Export Excel untuk ruang A (Kabel) saja tanpa perlu login"""
+    # Hanya izinkan export untuk ruang A (Kabel)
+    if ruang.upper() != 'A':
+        return redirect(url_for('dashboard'))
+    
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Font, PatternFill
+    from openpyxl.utils import get_column_letter
+    import io
+    from flask import send_file
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = f"Inventori {ruang}"
+
+    # ================= HEADER =================
+    ws['A1'] = f'INVENTORI LAB LISTRIK - RUANG {ruang}'
+    ws['A1'].font = Font(bold=True, size=14)
+    ws.merge_cells('A1:E1')
+    
+    ws['A2'] = f'Tanggal Export: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'
+    ws.merge_cells('A2:E2')
+
+    # ================= COLUMN HEADERS =================
+    ws['A4'] = 'No'
+    ws['B4'] = 'Nama Barang'
+    ws['C4'] = 'Jumlah'
+    ws['D4'] = 'Unit'
+    ws['E4'] = 'Status'
+
+    # Style header
+    header_fill = PatternFill(start_color="0B5FA5", end_color="0B5FA5", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF")
+    
+    for col in ['A', 'B', 'C', 'D', 'E']:
+        cell = ws[f'{col}4']
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal='center', vertical='center')
+
+    # ================= DATA =================
+    row = 5
+    items = Barang.query.filter_by(ruang=ruang.upper()).order_by(Barang.id).all()
+    
+    for idx, item in enumerate(items, 1):
+        ws[f'A{row}'] = idx
+        ws[f'B{row}'] = item.nama
+        ws[f'C{row}'] = item.jumlah
+        ws[f'D{row}'] = item.unit
+        
+        # Status berdasarkan jumlah
+        if item.jumlah >= 10:
+            ws[f'E{row}'] = 'Stok Penuh'
+            ws[f'E{row}'].fill = PatternFill(start_color="C8E6C9", end_color="C8E6C9", fill_type="solid")
+        elif item.jumlah <= 2:
+            ws[f'E{row}'] = 'Stok Rendah'
+            ws[f'E{row}'].fill = PatternFill(start_color="FFF59D", end_color="FFF59D", fill_type="solid")
+        else:
+            ws[f'E{row}'] = 'Normal'
+            ws[f'E{row}'].fill = PatternFill(start_color="E3F2FD", end_color="E3F2FD", fill_type="solid")
+
+        # Center alignment untuk angka
+        for col in ['A', 'C', 'D', 'E']:
+            ws[f'{col}{row}'].alignment = Alignment(horizontal='center')
+
+        row += 1
+
+    # ================= AUTO WIDTH =================
+    ws.column_dimensions['A'].width = 6
+    ws.column_dimensions['B'].width = 30
+    ws.column_dimensions['C'].width = 12
+    ws.column_dimensions['D'].width = 12
+    ws.column_dimensions['E'].width = 15
+
+    # ================= EXPORT =================
+    file_stream = io.BytesIO()
+    wb.save(file_stream)
+    file_stream.seek(0)
+
+    return send_file(
+        file_stream,
+        as_attachment=True,
+        download_name=f"inventori_ruang_{ruang.upper()}.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 
 # ================= UPLOAD FOLDER =================
