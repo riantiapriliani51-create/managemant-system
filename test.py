@@ -11,14 +11,24 @@ from datetime import datetime
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__, instance_path=os.path.join(BASE_DIR, 'instance'))
-app.secret_key = 'inventori-login'
+app.secret_key = os.environ.get('SECRET_KEY', 'inventori-login')
 
 # Ensure instance folder exists
 os.makedirs(app.instance_path, exist_ok=True)
 
-# Database configuration - using absolute path for Windows compatibility
-db_path = os.path.join(app.instance_path, 'inventory.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+# Database configuration - PostgreSQL for production, SQLite for development
+database_url = os.environ.get('DATABASE_URL')
+
+if database_url:
+    # Production: PostgreSQL
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    # Development: SQLite
+    db_path = os.path.join(app.instance_path, 'inventory.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 init_db(app)
