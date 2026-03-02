@@ -324,9 +324,25 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/uploads/<filename>')
+from werkzeug.exceptions import NotFound
+
+@app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    # serve file from uploads; try to be tolerant of case/spacing mismatches
+    filename = os.path.basename(filename)
+    try:
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    except NotFound:
+        # fallback: look for a file that normalizes to the same base name
+        def normalize(name):
+            base = os.path.splitext(name)[0]
+            return ''.join(ch.lower() for ch in base if ch.isalnum())
+        target = normalize(filename)
+        for f in os.listdir(app.config['UPLOAD_FOLDER']):
+            if normalize(f) == target:
+                return send_from_directory(app.config['UPLOAD_FOLDER'], f)
+        # still not found, re-raise
+        raise
 
 @app.route('/download/<filename>')
 def download_file(filename):
