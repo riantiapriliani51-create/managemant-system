@@ -216,6 +216,15 @@ def export_excel():
 @app.route('/export-public/<ruang>')
 def export_public(ruang):
     """Export Excel untuk ruang A (Kabel) saja tanpa perlu login"""
+    # Block access when logged in as admin or user (export should only be public)
+    if session.get('role') in ['admin', 'user']:
+        # return them to their respective dashboard or main page
+        if session.get('role') == 'admin':
+            return redirect(url_for('dashboard_admin'))
+        elif session.get('role') == 'user':
+            return redirect(url_for('dashboard_user'))
+        return redirect(url_for('dashboard'))
+
     # Hanya izinkan export untuk ruang A (Kabel)
     if ruang.upper() != 'A':
         return redirect(url_for('dashboard'))

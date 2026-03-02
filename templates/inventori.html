@@ -190,7 +190,8 @@
 
         <!-- ✅ TOMBOL KEMBALI DAN EXPORT (RUANG A ONLY) -->
         <div style="text-align: right; display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 20px;">
-            {% if nama == 'A' %}
+            {# only show public export for ruang A when not logged in as admin/user #}
+            {% if nama == 'A' and session.role not in ['admin', 'user'] %}
             <a href="{{ url_for('export_public', ruang=nama) }}" class="btn-kembali-dasboard_user" style="background-color: #4CAF50; text-decoration: none;">⬇ Export Excel</a>
             {% endif %}
             {% if session.role == 'admin' %}
