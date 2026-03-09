@@ -699,7 +699,7 @@ def upload_pdf_b():
 def inventori(nama):
 
     # Allow viewing inventory contents without login (read-only)
-    items = Barang.query.filter_by(ruang=nama.upper()).all()
+    items = Barang.query.filter_by(ruang=nama.upper()).order_by(Barang.id).all()
     return render_template('inventori.html', nama=nama.upper(), items=items)
 
 # ================= AMBIL BARANG =================
